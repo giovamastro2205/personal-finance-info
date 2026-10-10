@@ -1,0 +1,66 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Avvio autorizzazione Revolut</title>
+</head>
+<body>
+  <h2>Collegamento Revolut</h2>
+
+  <p>Inserisci il link di autorizzazione generato
+     da Enable Banking.</p>
+
+  <label for="authUrl">Link di autorizzazione</label>
+  <input id="authUrl" type="url"
+         style="width:100%;max-width:650px"
+         autocomplete="off">
+
+  <p>
+    <button id="start" type="button">
+      Avvia autorizzazione
+    </button>
+  </p>
+
+  <p id="status"></p>
+
+  <script>
+    document.getElementById("start")
+      .addEventListener("click", () => {
+        const status = document.getElementById("status");
+        const raw = document.getElementById("authUrl").value;
+
+        try {
+          const url = new URL(raw);
+
+          if (url.protocol !== "https:") {
+            throw new Error("È richiesto un link HTTPS.");
+          }
+
+          const state = url.searchParams.get("state");
+
+          if (!state) {
+            status.textContent =
+              "Impossibile trovare lo state nel link. " +
+              "Non proseguire.";
+            return;
+          }
+
+          sessionStorage.setItem("expected_state", state);
+
+          status.textContent =
+            "Apertura autorizzazione...";
+
+          window.location.assign(url.href);
+
+        } catch (err) {
+          status.textContent =
+            "Link non valido: " + err.message;
+        }
+      });
+  </script>
+</body>
+</html>
