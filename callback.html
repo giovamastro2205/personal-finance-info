@@ -5,42 +5,75 @@
   <meta charset="UTF-8">
   <meta name="referrer" content="no-referrer">
   <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Autorizzazione Revolut</title>
 </head>
+
 <body>
-  <h2>Autorizzazione Revolut</h2>
-  <p id="status">Controllo autorizzazione...</p>
-  <button id="copy" hidden>Copia codice</button>
+  <h2>Collegamento Revolut</h2>
+
+  <p id="status">Verifica dell'autorizzazione...</p>
+
+  <button id="copy" type="button" hidden>
+    Copia codice di autorizzazione
+  </button>
 
   <script>
-    const params = new URLSearchParams(location.search);
+    // Legge i parametri ricevuti da Enable Banking.
+    const params = new URLSearchParams(window.location.search);
+
     const code = params.get("code");
     const state = params.get("state");
     const error = params.get("error");
 
-    history.replaceState(null, "", location.pathname);
+    // Rimuove i parametri dall'indirizzo visibile.
+    window.history.replaceState(
+      null,
+      "",
+      window.location.pathname
+    );
 
     const status = document.getElementById("status");
     const button = document.getElementById("copy");
 
+    // Lo state atteso deve essere stato salvato
+    // in questa stessa scheda prima del collegamento.
+    const expectedState =
+      sessionStorage.getItem("expected_state");
+
     if (error) {
-      status.textContent = "Autorizzazione non riuscita.";
-    } else if (code && state) {
       status.textContent =
-        "Autorizzazione ricevuta. Conserva il codice in privato.";
+        "Autorizzazione non riuscita.";
+
+    } else if (!code || !state) {
+      status.textContent =
+        "Pagina pronta. In attesa dell'autorizzazione.";
+
+    } else if (!expectedState || state !== expectedState) {
+      status.textContent =
+        "Verifica di sicurezza non riuscita. " +
+        "Non utilizzare il codice.";
+
+    } else {
+      // Impedisce di riutilizzare lo state salvato.
+      sessionStorage.removeItem("expected_state");
+
+      status.textContent =
+        "Autorizzazione verificata correttamente.";
+
       button.hidden = false;
 
       button.addEventListener("click", async () => {
         try {
           await navigator.clipboard.writeText(code);
-          status.textContent = "Codice copiato.";
+
+          status.textContent =
+            "Codice copiato. Conservalo in privato.";
         } catch {
-          status.textContent = "Impossibile copiare il codice.";
+          status.textContent =
+            "Impossibile copiare automaticamente il codice.";
         }
       });
-    } else {
-      status.textContent =
-        "Pagina pronta. In attesa dell'autorizzazione.";
     }
   </script>
 </body>
