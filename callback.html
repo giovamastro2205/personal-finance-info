@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Autorizzazione Revolut</title>
+</head>
+<body>
+  <h2>Collegamento Revolut</h2>
+  <p id="message">Verifica del ritorno dalla banca...</p>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    const state = params.get("state");
+    const error = params.get("error");
+
+    // Rimuove immediatamente i parametri sensibili
+    // dalla barra degli indirizzi.
+    window.history.replaceState(
+      {},
+      "",
+      window.location.pathname
+    );
+
+    if (error) {
+      document.getElementById("message").textContent =
+        "Autorizzazione non completata.";
+    } else if (code && state) {
+      document.getElementById("message").textContent =
+        "Autorizzazione ricevuta. Non chiudere ancora questa pagina.";
+      // Il codice resta solo nella memoria di questa pagina.
+      // La conversione in sessione sarà configurata separatamente.
+    } else {
+      document.getElementById("message").textContent =
+        "Pagina pronta. Nessuna autorizzazione ricevuta.";
+    }
+  </script>
+</body>
+</html>
