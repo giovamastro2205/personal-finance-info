@@ -8,34 +8,39 @@
   <title>Autorizzazione Revolut</title>
 </head>
 <body>
-  <h2>Collegamento Revolut</h2>
-  <p id="message">Verifica del ritorno dalla banca...</p>
+  <h2>Autorizzazione Revolut</h2>
+  <p id="status">Controllo autorizzazione...</p>
+  <button id="copy" hidden>Copia codice</button>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(location.search);
     const code = params.get("code");
     const state = params.get("state");
     const error = params.get("error");
 
-    // Rimuove immediatamente i parametri sensibili
-    // dalla barra degli indirizzi.
-    window.history.replaceState(
-      {},
-      "",
-      window.location.pathname
-    );
+    history.replaceState(null, "", location.pathname);
+
+    const status = document.getElementById("status");
+    const button = document.getElementById("copy");
 
     if (error) {
-      document.getElementById("message").textContent =
-        "Autorizzazione non completata.";
+      status.textContent = "Autorizzazione non riuscita.";
     } else if (code && state) {
-      document.getElementById("message").textContent =
-        "Autorizzazione ricevuta. Non chiudere ancora questa pagina.";
-      // Il codice resta solo nella memoria di questa pagina.
-      // La conversione in sessione sarà configurata separatamente.
+      status.textContent =
+        "Autorizzazione ricevuta. Conserva il codice in privato.";
+      button.hidden = false;
+
+      button.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(code);
+          status.textContent = "Codice copiato.";
+        } catch {
+          status.textContent = "Impossibile copiare il codice.";
+        }
+      });
     } else {
-      document.getElementById("message").textContent =
-        "Pagina pronta. Nessuna autorizzazione ricevuta.";
+      status.textContent =
+        "Pagina pronta. In attesa dell'autorizzazione.";
     }
   </script>
 </body>
